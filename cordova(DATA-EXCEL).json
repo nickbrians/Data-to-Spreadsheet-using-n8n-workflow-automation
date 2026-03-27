@@ -1,0 +1,408 @@
+{
+  "name": "cordova(DATA-EXCEL)",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a63bd173-7ab6-45b6-83b2-84e1d5d06681",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1uBcFjgHuKxZ1gQhlVS87gVxU8WeBM9_S",
+          "mode": "list",
+          "cachedResultName": "cordova-cebu-latest-best-resident-db.brgyresidents-with-specific-fields.json",
+          "cachedResultUrl": "https://drive.google.com/file/d/1uBcFjgHuKxZ1gQhlVS87gVxU8WeBM9_S/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a71b88d9-1d06-4f44-b219-27b765ebab80",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "9ovQcOtWDAKmpUlT",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "5a52efeb-c7b3-4aa1-b38e-ab57ec5b9d94",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get your input data\nconst data = $input.first().json.data;\n\n// Group residents by barangay\nconst grouped = {};\n\ndata.forEach(r => {\n  const barangay = r.barangay.barangay_name;\n\n  if (!grouped[barangay]) {\n    grouped[barangay] = [];\n  }\n\n  grouped[barangay].push({\n    firstname: r.prof_firstname,\n    middlename: r.prof_middlename || \"\",\n    lastname: r.prof_lastname\n  });\n});\n\n// Return ONE item per barangay\nreturn Object.keys(grouped).map(barangay => ({\n  json: {\n    barangay: barangay,        // Spreadsheet name\n    residents: grouped[barangay]\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        0
+      ],
+      "id": "8e1b6be3-633b-4f07-8dc1-5baa33fe8cd8",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        816,
+        0
+      ],
+      "id": "0c948491-1a74-4fca-8f26-4992ed903c29",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1M_5sPejXZnQS5GIXNolBpurXDCQ8nA8QOUzxsZUjLsk",
+          "mode": "list",
+          "cachedResultName": "Latest BeST v1 data - cordova-cebu - from n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1M_5sPejXZnQS5GIXNolBpurXDCQ8nA8QOUzxsZUjLsk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $json.SheetName }}"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "Firstname": "={{ $json.Firstname }}",
+            "Middlename": "={{ $json.Middlename }}",
+            "Lastname": "={{ $json.Lastname }}",
+            "SheetName": "={{ $json.SheetName }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Firstname",
+              "displayName": "Firstname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Middlename",
+              "displayName": "Middlename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lastname",
+              "displayName": "Lastname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "SheetName",
+              "displayName": "SheetName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        784
+      ],
+      "id": "e031ddf5-00fd-4394-9b54-c51b195db182",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "5GB4qvnbFrV38kpb",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const barangay = $json[\"barangay\"];\nconst residents = $json[\"residents\"];\n\n// Flatten residents into rows for spreadsheet\nreturn residents.map(r => {\n  return {\n    json: {\n      Firstname: r.firstname,\n      Middlename: r.middlename,\n      Lastname: r.lastname,\n      SheetName: barangay // This tells Spreadsheet node which sheet\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        784
+      ],
+      "id": "3188f16e-d324-4e35-be7f-070bde942871",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\n\nfor (const item of items) {\n  const barangay = item.json.barangay;\n\n  for (const resident of item.json.residents) {\n    output.push({\n      json: {\n        barangay: barangay,\n        firstname: resident.firstname,\n        middlename: resident.middlename,\n        lastname: resident.lastname\n      }\n    });\n  }\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        16
+      ],
+      "id": "58a6a7fc-1f95-4d44-9f66-590b3b7cefba",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1BLId0kLQlYaTiCcedj5-1_kF4Is9YzWgQK5gZGH0Vfc",
+          "mode": "list",
+          "cachedResultName": "Latest BeST v1 data - cordova-cebu - from n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BLId0kLQlYaTiCcedj5-1_kF4Is9YzWgQK5gZGH0Vfc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $json.barangay }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "firstname",
+              "displayName": "firstname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "middlename",
+              "displayName": "middlename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lastname",
+              "displayName": "lastname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1280,
+        16
+      ],
+      "id": "34aa8968-865e-4b4b-9087-0cf1da7be299",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "5GB4qvnbFrV38kpb",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "documentId": {
+          "__rl": true,
+          "value": "1BLId0kLQlYaTiCcedj5-1_kF4Is9YzWgQK5gZGH0Vfc",
+          "mode": "list",
+          "cachedResultName": "Latest BeST v1 data - cordova-cebu - from n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BLId0kLQlYaTiCcedj5-1_kF4Is9YzWgQK5gZGH0Vfc/edit?usp=drivesdk"
+        },
+        "title": "={{ $json.barangay }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        -144
+      ],
+      "id": "358be870-1e6a-44f3-b80e-3661af1d9925",
+      "name": "Create sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "5GB4qvnbFrV38kpb",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "b1163a5f-f22f-4efd-aa92-2d1ab806e80a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3741704a66ebce5037fda2e8bfa4ef32f78604219cf5de7d5bf828e9e0fb2422"
+  },
+  "id": "ZODL655_H8ZhZHfVQ27so",
+  "tags": []
+}
