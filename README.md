@@ -1,5 +1,5 @@
 # DATA TO SPREADSHEET WORKFLOW AUTOMATION
-"This workflow will automatically creating your data into spreadsheet file/XLSX file."
+"This workflow will retrieve the barangay, first_name, middle_name, last_name in your data file."
 
 Follow these steps to download and import the workflow into your n8n setup.
 
