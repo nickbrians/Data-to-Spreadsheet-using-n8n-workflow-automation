@@ -28,13 +28,8 @@ Log in to your account.
 - Select the `.json` workflow file  
 - Click **Open / OK**
 
----
-
-## Done!
-Your workflow should now be successfully imported and ready to use in n8n.
-
----
 
 ## Notes
+- Create Spreadsheet file in your WPS and type first_name, last_name, middle_name
 - Make sure your n8n server is running before importing  
 - If the workflow uses external services (e.g., Google APIs), reconnect credentials after importing  
