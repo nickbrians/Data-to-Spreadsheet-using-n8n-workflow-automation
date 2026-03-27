@@ -30,6 +30,6 @@ Log in to your account.
 
 
 ## Notes
-- Create Spreadsheet file in your WPS and type first_name, last_name, middle_name
+- Create Spreadsheet file in your WPS name it and inside is first_name, last_name, middle_name
 - Make sure your n8n server is running before importing  
 - If the workflow uses external services (e.g., Google APIs), reconnect credentials after importing  
